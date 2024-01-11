@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { FiUser, FiLogIn } from "react-icons/fi"
 
 export function Header (){
-    const signed = false;
+    const signed = true;
     const loadingAuth = false;
 
 
@@ -20,16 +20,18 @@ export function Header (){
 
             {!loadingAuth && signed && (
                 <div className="rounded-full border-2 p-1 border-gray-900">
-                <Link to="/dashboard">
-                 <FiUser size={24} color="#000"/> 
-                </Link>
+                    <Link to="/dashboard">
+                    <FiUser size={24} color="#000"/> 
+                    </Link>
                 </div>
             )}
 
             {!loadingAuth && !signed && (
-                <Link to="/login">
-                 <FiLogIn size={24} color="#000"/> 
-                </Link>
+                 <div className="rounded-full border-2 p-1 border-gray-900">
+                    <Link to="/login">
+                    <FiLogIn size={24} color="#000"/> 
+                    </Link>
+                 </div>
             )}
 
 
