@@ -38,17 +38,12 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-
-
 interface ImageItemProps {
     uid: string
     name: string
     previewUrl: string
     url: string
 }
-
-
-
 
 export function NewCar (){
     const { user } = useContext(AuthContext)
@@ -148,11 +143,7 @@ async function handleDeleteImage(item: ImageItemProps){
     }catch{
         console.log("Erro ao deletar")
     }
-
-
-
 }
-
 
     return (
         <Container>
