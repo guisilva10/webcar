@@ -1,7 +1,7 @@
 import { ChangeEvent, useState, useContext } from "react";
 import { Container } from "../../../components/container";
 import { PanelHeader } from "../../../components/panelheader";
-import { FiUpload } from "react-icons/fi";
+import { FiUpload, FiTrash } from "react-icons/fi";
 
 import { useForm } from "react-hook-form";
 import { Input } from "../../../components/input";
@@ -11,7 +11,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { v4 as uuidV4} from "uuid"
 
-import { storage } from "../../../services";
+import { addDoc, collection } from "firebase/firestore";
+
+import { storage, db } from "../../../services";
 import {
      ref, 
      getDownloadURL, 
@@ -36,6 +38,18 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+
+
+interface ImageItemProps {
+    uid: string
+    name: string
+    previewUrl: string
+    url: string
+}
+
+
+
+
 export function NewCar (){
     const { user } = useContext(AuthContext)
 
@@ -43,6 +57,8 @@ export function NewCar (){
         resolver: zodResolver(schema),
         mode: "onChange"
     })
+
+    const [ carImages, setCarImages] = useState<ImageItemProps[]>([])
 
 
   async  function handleFile(e: ChangeEvent<HTMLInputElement>){
@@ -71,13 +87,70 @@ export function NewCar (){
         uploadBytes(uploadRef, image)
         .then((snapshot) => {
             getDownloadURL(snapshot.ref).then((downloadUrl) => {
-                console.log(downloadUrl)
+                const imageItem = {
+                    name: uidImage,
+                    uid: currentUid,
+                    previewUrl: URL.createObjectURL(image),
+                    url: downloadUrl
+                }
+                setCarImages((images) => [...images, imageItem])
             })
         })
     }
 
     function onSubmit(data: FormData){
-        console.log(data)
+        if(carImages.length === 0){
+            alert("Envie uma imagem deste carro")
+            return;
+        }
+
+
+        const carListImages = carImages.map(car => {
+            return {
+                uid: car.uid,
+                name: car.name,
+                url: car.url
+            }
+        })
+
+        addDoc(collection(db, "cars"), {
+            name: data.name,
+            model: data.model,
+            year: data.year,
+            km: data.km,
+            price: data.price,
+            cyty: data.city,
+            whatsapp: data.whatsapp,
+            description: data.description,
+            created: new Date(),
+            owner: user?.name,
+            uid: user?.uid,
+            images: carListImages
+        }).then(() => {
+            reset();
+            setCarImages([]);
+            console.log("Carro cadastrado com sucesso")
+        }).catch((error) => {
+            console.log(error)
+            console.log("Erro ao cadastrar veiculo")
+        })
+}
+
+
+async function handleDeleteImage(item: ImageItemProps){
+    const imagePth = `images/${item.uid}/${item.name}`
+
+    const imageRef = ref(storage, imagePth)
+
+    try{
+    await deleteObject(imageRef)
+    setCarImages(carImages.filter((car) => car.url !== item.url))
+    }catch{
+        console.log("Erro ao deletar")
+    }
+
+
+
 }
 
 
@@ -94,6 +167,14 @@ export function NewCar (){
                     <input type="file" accept="image" className="opacity-0 cursor-pointer" onChange={handleFile}/>
                   </div>
                 </button>
+                {carImages.map(item => (
+                    <div key={item.name} className="w-full h-32 flex justify-center items-center relative">
+                        <button className="absolute" onClick={() => handleDeleteImage(item)}>
+                            <FiTrash size={28} color="#fff"/>
+                        </button>
+                        <img src={item.previewUrl} alt="Foto do carro" className="rounded-lg w-full h-32 object-cover" />
+                    </div>
+                ))}
             </div>
 
             <div className="w-full rounded-lg bg-white p-3 flex flex-col sm:flex-row items-center gap-2 mt-2">
