@@ -10,6 +10,7 @@ import { Layout } from './components/layout'
 import { Private } from './routes/Private'
 
 
+
 const router = createBrowserRouter([
   {
     element: <Layout/>,
@@ -39,7 +40,8 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register/>
-  }
+  },
+
 ])
 
 export { router }

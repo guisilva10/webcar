@@ -3,6 +3,7 @@ import { Container } from "../../components/container";
 import { db } from "../../services";
 import { collection, query, getDocs, orderBy, where } from "firebase/firestore";
 import { useState, useEffect } from "react";
+import { Whatsapp } from "../../components/whatsapp";
 
 
 
@@ -101,6 +102,7 @@ const [input, setInput ] = useState("")
 
 
     return (
+        <>
        <Container>
          <section className="bg-white p-4 w-full rounded-lg max-w-3xl mx-auto flex justify-center items-center gap-2">
             <input 
@@ -154,13 +156,13 @@ const [input, setInput ] = useState("")
                 </section>
             </Link>
            )) 
-           }  {
-            <p className="text-black font-medium text-xl text-center">Nenhum Veículo disponivel</p>
            }
         </main>
 
-
+           
 
        </Container>
+       <Whatsapp/>
+       </>
     )
 }
