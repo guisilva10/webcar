@@ -154,7 +154,7 @@ const [input, setInput ] = useState("")
                 </section>
             </Link>
            )) 
-           } : {
+           }  {
             <p className="text-black font-medium text-xl text-center">Nenhum Veículo disponivel</p>
            }
         </main>
