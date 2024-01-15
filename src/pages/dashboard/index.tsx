@@ -77,7 +77,6 @@ export function Dashboard (){
             try{
              await deleteObject(imageRef)
              setCars(cars.filter(car => car.id != itemCar.id))
-             toast.success("Carro deletado com sucesso!")
             }catch(error){
                 console.log("Erro ao deletar essa imagem")
                 toast.error("Ops, algo deu errado, tente novamente!")
@@ -91,8 +90,9 @@ export function Dashboard (){
         <Container>
             <PanelHeader/>
 
+            <p className="my-1">Ola, {user?.name}</p>
+            <strong className="mb-6font-bold text-xl">Seus veículos:</strong>
             <main className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">  
-
             {cars.map(car => (
                 <section key={car.id} className="w-full rounded-lg relative bg-white">
                    
