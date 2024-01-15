@@ -6,6 +6,7 @@ import { collection, getDocs, where, query, doc, deleteDoc} from "firebase/fires
 import { db, storage } from "../../services";
 import { AuthContext } from "../../contexts/AuthContext";
 import { deleteObject, ref } from "firebase/storage";
+import toast from "react-hot-toast";
 
 interface CarProps{
     id: string;
@@ -76,8 +77,10 @@ export function Dashboard (){
             try{
              await deleteObject(imageRef)
              setCars(cars.filter(car => car.id != itemCar.id))
+             toast.success("Carro deletado com sucesso!")
             }catch(error){
                 console.log("Erro ao deletar essa imagem")
+                toast.error("Ops, algo deu errado, tente novamente!")
             }
         })
         

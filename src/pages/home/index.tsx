@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Container } from "../../components/container";
 import { db } from "../../services";
-import { collection, query, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, getDocs, orderBy, where } from "firebase/firestore";
 import { useState, useEffect } from "react";
 
 
@@ -26,38 +26,76 @@ interface CarsImagesProps{
 export function Home (){
 const [ cars, setCars ] = useState<CarsProps[]>([])
 const [ loadImages, setLoadImages ] = useState<string[]>([])
+const [input, setInput ] = useState("")
 
 
     useEffect(() => {
-            function loadCars(){
-                const carsRef = collection(db, "cars")
-                const queryRef = query(carsRef, orderBy("created", "desc"))
-
-                getDocs(queryRef)
-                .then((snapshot) => {
-                    const listcars = [] as CarsProps[];
-
-                    snapshot.forEach( doc => {
-                        listcars.push({
-                            id: doc.id,
-                            name: doc.data().name,
-                            year: doc.data().year,
-                            uid: doc.data().uid,
-                            price: doc.data().price,
-                            city: doc.data().city,
-                            km: doc.data().km,
-                            images: doc.data().images
-                        })
-                    })
-
-                    setCars(listcars)
-                })
-            }
             loadCars();
     }, [])
 
+    function loadCars(){
+        const carsRef = collection(db, "cars")
+        const queryRef = query(carsRef, orderBy("created", "desc"))
+
+        getDocs(queryRef)
+        .then((snapshot) => {
+            const listcars = [] as CarsProps[];
+
+            snapshot.forEach( doc => {
+                listcars.push({
+                    id: doc.id,
+                    name: doc.data().name,
+                    year: doc.data().year,
+                    uid: doc.data().uid,
+                    price: doc.data().price,
+                    city: doc.data().city,
+                    km: doc.data().km,
+                    images: doc.data().images
+                })
+            })
+
+            setCars(listcars)
+        })
+    }
+
     function handleImageLoad(id: string){
         setLoadImages((prevImageLoaded) => [...prevImageLoaded, id] )
+    }
+
+
+   async function handleSearchCar(){
+        if(input === ''){
+            loadCars();
+            return;
+        }
+
+        setCars([]);
+        setLoadImages([]);
+
+
+        const q = query(collection(db, "cars"),
+        where("name", ">=", input.toUpperCase()),
+        where("name", "<=", input.toUpperCase() + "\uf8ff")
+        )
+
+        const querySnapshot = await getDocs(q)
+
+        const listcars = [] as CarsProps[];
+
+        querySnapshot.forEach(doc => {
+            listcars.push({
+                id: doc.id,
+                name: doc.data().name,
+                year: doc.data().year,
+                uid: doc.data().uid,
+                price: doc.data().price,
+                city: doc.data().city,
+                km: doc.data().km,
+                images: doc.data().images
+            })
+        })
+
+        setCars(listcars)
     }
 
 
@@ -67,8 +105,14 @@ const [ loadImages, setLoadImages ] = useState<string[]>([])
          <section className="bg-white p-4 w-full rounded-lg max-w-3xl mx-auto flex justify-center items-center gap-2">
             <input 
             className="rounded-lg w-full border-2 outline-none h-9 px-3"
-            placeholder="Digite o carro que deseja"/>
-            <button className="bg-red-500 h-9 px-8 rounded-lg text-white font-medium text-lg">
+            placeholder="Digite o carro que deseja"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            />
+            <button 
+            className="bg-red-500 h-9 px-8 rounded-lg text-white font-medium text-lg"
+            onClick={handleSearchCar}
+            >
                 Buscar
             </button>
          </section>

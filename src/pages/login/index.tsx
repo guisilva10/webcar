@@ -11,6 +11,8 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth"
 import { auth } from "../../services"
 import { useEffect } from "react"
 
+import { toast } from "react-hot-toast"
+
 const schema = z.object({
     email: z.string().email("Insira um email válido").nonempty("Este campo é obrigatório"),
     password: z.string().nonempty("Este campo é obrigatório"),
@@ -36,12 +38,14 @@ export function Login (){
     function onSubmit (data: FormData){
         signInWithEmailAndPassword(auth, data.email, data.password)
         .then((user) => {
+            toast.success("Login feito com sucesso")
             navigate("/dashboard", {replace: true})
             console.log("Login feito com sucesso")
             console.log(user)
 
 
         }).catch(error => {
+            toast.error("Ops, algo deu errado, tente novamente!")
             console.log("Erro ao fazer Login")
             console.log(error)
         })

@@ -20,6 +20,7 @@ import {
      deleteObject, 
      uploadBytes 
 } from "firebase/storage";
+import { toast } from "react-hot-toast";
 
 
 const schema = z.object({
@@ -109,12 +110,12 @@ export function NewCar (){
         })
 
         addDoc(collection(db, "cars"), {
-            name: data.name,
+            name: data.name.toUpperCase(),
             model: data.model,
             year: data.year,
             km: data.km,
             price: data.price,
-            cyty: data.city,
+            city: data.city,
             whatsapp: data.whatsapp,
             description: data.description,
             created: new Date(),
@@ -125,9 +126,11 @@ export function NewCar (){
             reset();
             setCarImages([]);
             console.log("Carro cadastrado com sucesso")
+            toast.success("Carro cadastrado com sucesso")
         }).catch((error) => {
             console.log(error)
             console.log("Erro ao cadastrar veiculo")
+            toast.error("Ops, algo deu errado!, tente novamente")
         })
 }
 
@@ -139,9 +142,11 @@ async function handleDeleteImage(item: ImageItemProps){
 
     try{
     await deleteObject(imageRef)
+    toast.success("Imagem deletada com sucesso!")
     setCarImages(carImages.filter((car) => car.url !== item.url))
     }catch{
         console.log("Erro ao deletar")
+        toast.error("Ops, algo deu errado, tente novamente!")
     }
 }
 

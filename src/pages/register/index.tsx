@@ -13,6 +13,8 @@ import { auth } from "../../services"
 import { createUserWithEmailAndPassword, signOut, updateProfile} from "firebase/auth"
 import { AuthContext } from "../../contexts/AuthContext"
 
+import { toast } from "react-hot-toast"
+
 
 
 
@@ -56,10 +58,12 @@ export function Register (){
             })
             console.log("Conta cadastrada com sucesso!")
             navigate("/dashboard", {replace: true})
+            toast.success("Cadastro feito com sucesso!")
         })
         .catch(error => {
             console.log("Erro ao cadastrar conta")
             console.log(error)
+            toast.error("Ops, algo deu errado, tente novamente!")
         })
     }
 
