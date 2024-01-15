@@ -3,8 +3,9 @@ import { Container } from "../../components/container";
 import { PanelHeader } from "../../components/panelheader";
 import { FiTrash2 } from "react-icons/fi"
 import { collection, getDocs, where, query, doc, deleteDoc} from "firebase/firestore";
-import { db } from "../../services";
+import { db, storage } from "../../services";
 import { AuthContext } from "../../contexts/AuthContext";
+import { deleteObject, ref } from "firebase/storage";
 
 interface CarProps{
     id: string;
@@ -26,6 +27,7 @@ interface ImagesCarsProps{
 export function Dashboard (){
     const [cars, setCars] = useState<CarProps[]>([])
     const {user} = useContext(AuthContext)
+    
 
     useEffect(() => {
         function loadCars(){
@@ -34,7 +36,7 @@ export function Dashboard (){
             }
 
             const carsRef = collection(db, "cars")
-            const queryRef = query(carsRef, where("uid", "==", user))
+            const queryRef = query(carsRef, where("uid", "==", user.uid))
     
             getDocs(queryRef)
             .then((snapshot) => {
@@ -60,10 +62,25 @@ export function Dashboard (){
     }, [user])
 
 
-    async function handleDeleteCar(id: string){
-        const docRef = doc(db, "cars", id)
+    async function handleDeleteCar(car: CarProps){
+        const itemCar = car;
+        const docRef = doc(db, "cars", itemCar.id)
         await deleteDoc(docRef)
-        setCars(cars.filter(car => car.id != id))
+
+
+        itemCar.images.map(async (image) => {
+            const imagePath = `images/${image.uid}/${image.name}`;
+            const imageRef = ref(storage, imagePath);
+
+           
+            try{
+             await deleteObject(imageRef)
+             setCars(cars.filter(car => car.id != itemCar.id))
+            }catch(error){
+                console.log("Erro ao deletar essa imagem")
+            }
+        })
+        
     }
 
 
@@ -75,9 +92,10 @@ export function Dashboard (){
 
             {cars.map(car => (
                 <section key={car.id} className="w-full rounded-lg relative bg-white">
+                   
                     <button 
                     className="absolute w-14 h-14 flex rounded-full items-center justify-center bg-white right-2 top-2 drop-shadow"
-                    onClick={() => handleDeleteCar(car.id)}
+                    onClick={() => handleDeleteCar(car)}
                     >
                         <FiTrash2 size={26} color="#000"/>
                     </button>
@@ -85,6 +103,7 @@ export function Dashboard (){
                         className="w-full rounded-lg max-h-70 mb-2" 
                         src={car.images[0].url} 
                         alt="imagem do carro" 
+                       
                     />
                     <p className="font-bold mt-1 mb-2 px-2">{car.name}</p>
                     <div className="flex flex-col px-2">
